@@ -11,26 +11,35 @@ class Utilities {
             try {
                 System.load(
                     FileSystems.getDefault()
-                            .getPath("./../build/libjnitests.dll")  // Dynamic link
+                            .getPath("./build/libjnitests.dll")  // Dynamic link
                             .normalize().toAbsolutePath().toString());
             } catch (UnsatisfiedLinkError e) {
                 System.load(
                     FileSystems.getDefault()
-                            .getPath("./../build/libjnitests.lib")  // Static link
+                            .getPath("./build/libjnitests.lib")  // Static link
                             .normalize().toAbsolutePath().toString());
             }
         } else {
             // Unix based
             try {
+                System.out.println("try load there!!");
                 System.load(
                     FileSystems.getDefault()
-                            .getPath("./../build/libjnitests.so")  // Dynamic link
+                            // .getPath("./build/libjnitests.so")  // Dynamic link
+                            .getPath("./build/test/libtest.so")  // Dynamic link
                             .normalize().toAbsolutePath().toString());
+                // System.load(
+                //     FileSystems.getDefault()
+                //             // .getPath("./build/libjnitests.so")  // Dynamic link
+                //             .getPath("./build/libjnitests.a")  // Dynamic link
+                //             .normalize().toAbsolutePath().toString());
             } catch (UnsatisfiedLinkError e) {
-                System.load(
-                    FileSystems.getDefault()
-                            .getPath("./../build/libjnitests.a")  // Static link
-                            .normalize().toAbsolutePath().toString());
+                System.out.println("load here!!");
+                System.loadLibrary("jnitests");
+                // System.load(
+                //     FileSystems.getDefault()
+                //             .getPath("./build/libjnitests.a")  // Static link
+                //             .normalize().toAbsolutePath().toString());
             }
         }
     }
