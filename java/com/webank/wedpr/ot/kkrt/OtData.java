@@ -11,5 +11,4 @@ public class OtData {
     long[] receiverSeed;
     long[] receiverMatrix;
     byte[] receiverPack;
-    String[] data;
 }

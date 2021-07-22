@@ -4,39 +4,39 @@ import java.util.HashMap;
 
 public class Sender {
     long senderHandle;
-    long choiceCount;
-    long msgCount;
+    int choiceCount;
+    int messageCount;
 
-    public void init(long _choiceCount, long _msgCount, HashMap<Long, String> data) {
-        choiceCount = _choiceCount;
-        msgCount = _msgCount;
-        senderHandle = NativeInterface.initSender(choiceCount, msgCount, data);
+    // this
+    public void init(int choiceCount, int messageCount, HashMap<Long, String> data) {
+        this.choiceCount = choiceCount;
+        this.messageCount = messageCount;
+        senderHandle = NativeInterface.initSender(choiceCount, messageCount, data);
     }
 
-    private OtData getSenderEncMessage() {
-        OtData otData = NativeInterface.getSenderEncMessage(senderHandle, msgCount);
+    // Encrypted
+    private OtData getSenderEncryptedMessage() {
+        OtData otData = NativeInterface.getSenderEncryptedMessage(senderHandle, messageCount);
         return otData;
     }
 
+    // return otDataInput
     public OtData step2ExtendSeedPack(OtData otDataInput) {
         OtData otData = NativeInterface.step2SenderExtendSeedPack(senderHandle, otDataInput);
         return otData;
     }
 
-    // public OtData step4SenderGenerateSeed(OtData otDataInput) {
-    //     OtData otData = NativeInterface.step2SenderExtendSeedPack(senderHandle, otDataInput);
-    //     return otData;
-    // }
-
     public OtData step4SetMatrix(OtData otDataInput) {
-        OtData otData = NativeInterface.step4SenderSetMatrix(senderHandle, otDataInput, choiceCount, msgCount);
+        OtData otData = NativeInterface.step4SenderSetMatrix(senderHandle, otDataInput, choiceCount, messageCount);
         // set EncMessage and send it to Receiver
-        OtData newData = getSenderEncMessage();
+        OtData newData = getSenderEncryptedMessage();
         otData.enMessage = newData.enMessage;
         otData.hash = newData.hash;
         return otData;
     }
 
-
+    public void free() {
+        NativeInterface.freeSender(senderHandle);
+    }
 
 }

@@ -2,13 +2,13 @@ package com.webank.wedpr.ot.kkrt;
 
 public class Receiver {
     long receiverHandle;
-    long choiceCount;
-    long msgCount;
+    int choiceCount;
+    int messageCount;
 
-    public void init(long _choiceCount, long _msgCount, long[] choice) {
-        choiceCount = _choiceCount;
-        msgCount = _msgCount;
-        receiverHandle = NativeInterface.initReceiver(choiceCount, msgCount, choice);
+    public void init(int choiceCount, int messageCount, long[] choice) {
+        this.choiceCount = choiceCount;
+        this.messageCount = messageCount;
+        receiverHandle = NativeInterface.initReceiver(choiceCount, messageCount, choice);
     }
 
     public OtData step1InitBaseOt() {
@@ -23,13 +23,17 @@ public class Receiver {
 
 
     public OtData step3InitMatrix(OtData otDataInput) {
-        OtData otData = NativeInterface.step3ReceiverInitMatrix(receiverHandle, otDataInput, choiceCount);
-        return otData;
+        otDataInput = NativeInterface.step3ReceiverInitMatrix(receiverHandle, otDataInput, choiceCount);
+        return otDataInput;
     }
 
-    public OtData step5GetResult(OtData otDataInput) {
-        OtData otData = NativeInterface.step5ReceiverGetFinalResultWithDecMessage(receiverHandle, otDataInput, choiceCount);
-        return otData;
+    public OtResult step5GetResult(OtData otDataInput) {
+        OtResult otResult = NativeInterface.step5ReceiverGetFinalResultWithDecMessage(receiverHandle, otDataInput, choiceCount);
+        return otResult;
+    }
+
+    public void free() {
+        NativeInterface.freeReceiver(receiverHandle);
     }
 
 }
