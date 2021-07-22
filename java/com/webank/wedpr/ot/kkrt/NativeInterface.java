@@ -7,12 +7,12 @@ import java.util.HashMap;
 
 class NativeInterface {
 
-    public static final int BLOCK_LENGTH = 2;
-    public static final int BLOCK_SIZE = 32;
+    public static final int BLOCK_LONG_SIZE = 2;
+    public static final int BLOCK_BYTE_SIZE = 32;
     public static final int HASH_SIZE = 20;
     public static final int SENDER_PACK_SEED_LENGTH = 49;
     public static final int RECEIVER_PACK_LENGTH = 16896;
-    public static final int RECEIVER_MATRIX_COLUMN = 4;
+    public static final int RECEIVER_MATRIX_COLUMN_NUMBER = 4;
 
     static {
         if (System.getProperty("os.name").startsWith("Windows")) {
@@ -73,7 +73,7 @@ class NativeInterface {
             message[i] = entry.getValue();
             i++;
         }
-        return newSender((long)choiceCount, (long)messageCount, message, key);
+        return newSender(choiceCount, messageCount, message, key);
     }
 
     public static void freeSender(long senderHandle) {
@@ -82,8 +82,8 @@ class NativeInterface {
 
     public static OtData getSenderEncryptedMessage(long senderHandle, int messageCount) {
         OtData otData = new OtData();
-        otData.enMessage = new long[messageCount][BLOCK_SIZE];
-        otData.hash = new byte[(int)messageCount][HASH_SIZE];
+        otData.enMessage = new long[messageCount][BLOCK_BYTE_SIZE];
+        otData.hash = new byte[messageCount][HASH_SIZE];
         getSenderEncryptedMessage(senderHandle, otData.enMessage, otData.hash);
         return otData;
     }
@@ -99,14 +99,14 @@ class NativeInterface {
     public static OtData step1ReceiverInitBaseOt(long receiverHandle) {
         OtData otData = new OtData();
         otData.senderPackSeed = new byte[SENDER_PACK_SEED_LENGTH];
-        otData.receiverSeed = new long[BLOCK_LENGTH];
+        otData.receiverSeed = new long[BLOCK_LONG_SIZE];
         step1ReceiverInitBaseOt(receiverHandle, otData.senderPackSeed, otData.receiverSeed);
         return otData;
     }
 
     public static OtData step2SenderExtendSeedPack(long senderHandle, OtData otData) {
         otData.receiverPack = new byte[RECEIVER_PACK_LENGTH];
-        otData.senderSeed = new long[BLOCK_LENGTH];
+        otData.senderSeed = new long[BLOCK_LONG_SIZE];
         otData.senderSeedHash = new byte[HASH_SIZE];
         step2SenderExtendSeedPack(senderHandle, otData.senderPackSeed, otData.receiverSeed, otData.receiverPack);
         step4SenderGenerateSeed(senderHandle, otData.senderSeed, otData.senderSeedHash);
@@ -114,8 +114,8 @@ class NativeInterface {
     }
 
     public static OtData step3ReceiverInitMatrix(long receiverHandle, OtData otData, int choiceCount) {
-        otData.receiverSeed = new long[BLOCK_LENGTH];
-        int receiverMatrixSize = RECEIVER_MATRIX_COLUMN * BLOCK_LENGTH * choiceCount;
+        otData.receiverSeed = new long[BLOCK_LONG_SIZE];
+        int receiverMatrixSize = RECEIVER_MATRIX_COLUMN_NUMBER * BLOCK_LONG_SIZE * choiceCount;
         otData.receiverMatrix = new long[receiverMatrixSize];
         step3ReceiverSetSeedPack(receiverHandle, otData.receiverPack);
         step5ReceiverInitMatrix(receiverHandle, otData.senderSeed, otData.senderSeedHash, otData.receiverSeed, otData.receiverMatrix);
@@ -123,7 +123,7 @@ class NativeInterface {
     }
 
     public static OtData step4SenderSetMatrix(long senderHandle, OtData otData, int choiceCount, int messageCount) {
-        int senderMatrixSize = BLOCK_LENGTH*choiceCount*messageCount;
+        int senderMatrixSize = BLOCK_LONG_SIZE*choiceCount*messageCount;
         otData.senderMatrix = new long[senderMatrixSize];
         step6SenderSetMatrix(senderHandle, otData.receiverSeed, otData.receiverMatrix, otData.senderSeed, otData.senderMatrix);
         return otData;
@@ -148,16 +148,16 @@ class NativeInterface {
             keys[i] = 123456 + i;
         }
     //     // byte[] s2 = {1, 2};
-        long senderHandle = newSender((long)choiceCount, (long)messageCount, messages, keys);
+        long senderHandle = newSender(choiceCount, messageCount, messages, keys);
         System.out.println("senderHandle = "+ senderHandle);
-        long[] choice = new long[(int)choiceCount];
+        long[] choice = new long[choiceCount];
         for(int i = 0; i < choiceCount; i++) {
             choice[i] = 123476 + i;
         }
-        long receiverHandle = newReceiver((long)choiceCount, (long)messageCount, choice);
+        long receiverHandle = newReceiver(choiceCount, messageCount, choice);
         System.out.println("receiverHandle = "+ receiverHandle);
         byte[] senderPackSeed = new byte[SENDER_PACK_SEED_LENGTH];
-        long[] receiverSeed = new long[BLOCK_LENGTH];
+        long[] receiverSeed = new long[BLOCK_LONG_SIZE];
         step1ReceiverInitBaseOt(receiverHandle, senderPackSeed, receiverSeed);
     //     // 0~48
         // for(int i = 0; i < senderPackSeed.length; i++) {
@@ -172,7 +172,7 @@ class NativeInterface {
         // }
         step3ReceiverSetSeedPack(receiverHandle, receiverPack);
 
-        long[] senderSeed = new long[BLOCK_LENGTH];
+        long[] senderSeed = new long[BLOCK_LONG_SIZE];
         byte[] senderSeedHash = new byte[HASH_SIZE];
         step4SenderGenerateSeed(senderHandle, senderSeed, senderSeedHash);
         // for(int i = 0; i < senderSeed.length; i++) {
@@ -184,24 +184,24 @@ class NativeInterface {
         //     System.out.println("senderSeedHash = "+ senderSeedHash[i]);
         // }
 
-        long[] receiverSeedKkrt = new long[BLOCK_LENGTH];
-        long[] receiverMatrix = new long[RECEIVER_MATRIX_COLUMN * BLOCK_LENGTH * choiceCount];
+        long[] receiverSeedKkrt = new long[BLOCK_LONG_SIZE];
+        long[] receiverMatrix = new long[RECEIVER_MATRIX_COLUMN_NUMBER * BLOCK_LONG_SIZE * choiceCount];
         step5ReceiverInitMatrix(receiverHandle, senderSeed, senderSeedHash, receiverSeedKkrt, receiverMatrix);
         // for(int i = 0; i < receiverMatrix.length; i++) {
         //     System.out.println("receiverMatrix = "+ receiverMatrix[i]);
         // }
-        long[] senderMatrix = new long[BLOCK_LENGTH*choiceCount*messageCount];
+        long[] senderMatrix = new long[BLOCK_LONG_SIZE*choiceCount*messageCount];
         step6SenderSetMatrix(senderHandle, receiverSeedKkrt, receiverMatrix, senderSeed, senderMatrix);
         // for(int i = 0; i < senderMatrix.length; i++) {
         //     System.out.println("senderMatrix = "+ senderMatrix[i]);
         // }
-        long[][] enMessage = new long[messageCount][BLOCK_SIZE];
-        byte[][] hash = new byte[(int)messageCount][HASH_SIZE];
+        long[][] enMessage = new long[messageCount][BLOCK_BYTE_SIZE];
+        byte[][] hash = new byte[messageCount][HASH_SIZE];
         getSenderEncryptedMessage(senderHandle, enMessage, hash);
         // for(int i = 0; i < enMessage.length; i++) {
         //     System.out.println("enMessage = "+ enMessage[i]);
         // }
-        String[] data = new String[(int)choiceCount];
+        String[] data = new String[choiceCount];
         step7ReceiverGetFinalResultWithDecMessage(receiverHandle, senderMatrix, enMessage, hash, data);
         for(int i = 0; i < data.length; i++) {
             System.out.println("data = "+ data[i]);

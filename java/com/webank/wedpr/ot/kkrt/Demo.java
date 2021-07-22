@@ -4,22 +4,24 @@ import java.util.HashMap;
 public class Demo {
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
-        int choiceCount = 100;
+        int choiceCount = 10;
         // message
         int messageCount = 10000;
         // init Sender
         Sender sender = new Sender();
         HashMap<Long, String> data = new HashMap<Long, String>();
+        long startId = 123456;
         for(int i = 0; i < messageCount; i++) {
-            data.put((long)123456+i, "WeDPR Test Message index:" + i);
+            // data.put(startId+i, "WeDPR Test Message index:111111" + i);
+            data.put(startId+i, "WeDPR Test Message index:11111111");
         }
         sender.init(choiceCount, messageCount, data);
 
         // init Receiver
         Receiver receiver = new Receiver();
-        long[] choice = new long[(int)choiceCount];
+        long[] choice = new long[choiceCount];
         for(int i = 0; i < choiceCount; i++) {
-            choice[i] = (long)123456+20+i;
+            choice[i] = startId+20+i;
         }
         receiver.init(choiceCount, messageCount, choice);
 
@@ -45,6 +47,7 @@ public class Demo {
         long end = System.currentTimeMillis();
         System.out.println("choiceCount:"+ choiceCount + ", messageCount:" + messageCount + " run time = " + (end - start) + "ms");
 
+        // free() is essential otherwise will case memory leak
         sender.free();
         receiver.free();
     }
